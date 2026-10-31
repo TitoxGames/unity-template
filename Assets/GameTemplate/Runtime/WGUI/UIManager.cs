@@ -78,35 +78,59 @@ namespace GameTemplate.Runtime.WGUI
 
         #region Public API
 
+        /// <summary>The config asset, e.g. to map an AssetReference to its screen type.</summary>
+        public UIConfigSO Config => uiConfig;
+
+        /// <summary><typeparamref name="T"/> may be a base class; the single registered subclass of it is shown.</summary>
         public void Show<T>(Action<T> onInit = null, Action onComplete = null) where T : UIBase
         {
-            ShowInternalAsync<T>(onInit, onComplete).Forget();
+            ShowInternalAsync(typeof(T), WrapInit(onInit), onComplete).Forget();
         }
 
-        public UniTask<T> ShowAsync<T>(Action<T> onInit = null, Action onComplete = null) where T : UIBase
+        /// <summary><typeparamref name="T"/> may be a base class; the single registered subclass of it is shown.</summary>
+        public async UniTask<T> ShowAsync<T>(Action<T> onInit = null, Action onComplete = null) where T : UIBase
         {
-            return ShowInternalAsync<T>(onInit, onComplete);
+            UIBase ui = await ShowInternalAsync(typeof(T), WrapInit(onInit), onComplete);
+            return ui as T;
         }
-        private async UniTask<T> ShowInternalAsync<T>(Action<T> onInit = null, Action onComplete = null) where T : UIBase
-        {
-            Type type = typeof(T);
 
-            UIConfig config = uiConfig.GetConfig(type);
+        public void Show(Type type, Action<UIBase> onInit = null, Action onComplete = null)
+        {
+            ShowInternalAsync(type, onInit, onComplete).Forget();
+        }
+
+        public UniTask<UIBase> ShowAsync(Type type, Action<UIBase> onInit = null, Action onComplete = null)
+        {
+            return ShowInternalAsync(type, onInit, onComplete);
+        }
+
+        private static Action<UIBase> WrapInit<T>(Action<T> onInit) where T : UIBase
+        {
+            if (onInit == null)
+                return null;
+
+            return ui => onInit(ui as T);
+        }
+
+        private async UniTask<UIBase> ShowInternalAsync(Type requestedType, Action<UIBase> onInit, Action onComplete)
+        {
+            Type type = uiConfig.ResolveType(requestedType);
+            UIConfig config = type != null ? uiConfig.GetConfig(type) : null;
             if (config == null)
             {
-                Debug.LogError($"[UIManager] No UIConfig for {type.Name}");
+                Debug.LogError($"[UIManager] No UIConfig for {requestedType?.Name}");
                 return null;
             }
-            UIBase newUI = await GetOrSpawn<T>();
+            UIBase newUI = await GetOrSpawn(type);
             if (newUI == null)
                 return null;
-            onInit?.Invoke(newUI as T);
+            onInit?.Invoke(newUI);
             newUI.SetAnimationDuration(config.AnimationDuration);
             if (newUI is UINotification notification && notification.gameObject.activeSelf)
             {
                 await notification.RestartShowAsync();
                 onComplete?.Invoke();
-                return newUI as T;
+                return newUI;
             }
             HandleCurrentUIBeforeShow(newUI, config);
             try
@@ -120,31 +144,27 @@ namespace GameTemplate.Runtime.WGUI
                 Debug.LogWarning($"[UIManager] Show animation for {type.Name} was canceled.");
 
             }
-            return newUI as T;
+            return newUI;
 
         }
 
-        private async UniTask<T> GetOrSpawn<T>() where T : UIBase
+        private async UniTask<UIBase> GetOrSpawn(Type type)
         {
-            Type type = typeof(T);
-
             if (_spawned.TryGetValue(type, out UIBase cached) && cached != null)
-                return cached as T;
+                return cached;
 
             if (_spawning.TryGetValue(type, out UniTask<UIBase> existingTask))
             {
                 Debug.LogWarning($"[UIManager] {type.Name} đang được tải/tạo, đợi tiến trình cũ...");
-                UIBase awaitedUI = await existingTask;
-                return awaitedUI as T;
+                return await existingTask;
             }
 
-            UniTask<UIBase> spawnTask = InternallySpawnAndRegister<T>(type);
+            UniTask<UIBase> spawnTask = InternallySpawnAndRegister(type).Preserve();
             _spawning[type] = spawnTask;
 
             try
             {
-                UIBase result = await spawnTask;
-                return result as T;
+                return await spawnTask;
             }
             finally
             {
@@ -153,7 +173,7 @@ namespace GameTemplate.Runtime.WGUI
             }
         }
 
-        private async UniTask<UIBase> InternallySpawnAndRegister<T>(Type type) where T : UIBase
+        private async UniTask<UIBase> InternallySpawnAndRegister(Type type)
         {
             UIConfig config = uiConfig.GetConfig(type);
             if (config == null || config.AssetReference == null)
@@ -162,7 +182,7 @@ namespace GameTemplate.Runtime.WGUI
                 return null;
             }
 
-            T ui = await Spawn<T>(config);
+            UIBase ui = await Spawn(type, config);
             if (ui == null) return null;
 
             ui.gameObject.SetActive(false);
@@ -179,10 +199,10 @@ namespace GameTemplate.Runtime.WGUI
             return ui;
         }
 
-        private async UniTask<T> Spawn<T>(UIConfig config) where T : UIBase
+        private async UniTask<UIBase> Spawn(Type type, UIConfig config)
         {
             UIBase cachedPrefab = null;
-            if (_loaded.TryGetValue(typeof(T), out AsyncOperationHandle<GameObject> cachedHandle))
+            if (_loaded.TryGetValue(type, out AsyncOperationHandle<GameObject> cachedHandle))
             {
                 cachedPrefab = cachedHandle.Result.GetComponent<UIBase>();
             }
@@ -196,25 +216,28 @@ namespace GameTemplate.Runtime.WGUI
                     return null;
                 }
                 cachedPrefab = handle.Result.GetComponent<UIBase>();
-                _loaded.TryAdd(typeof(T), handle);
+                _loaded.TryAdd(type, handle);
             }
 
             if (_parent == null) _parent = transform;
-            UIBase instance = Instantiate(cachedPrefab, _parent);
-            return instance as T;
+            return Instantiate(cachedPrefab, _parent);
         }
 
         public void Hide<T>(Action onComplete = null) where T : UIBase
         {
-            HideInternal<T>(onComplete).Forget();
+            HideInternal(typeof(T), onComplete).Forget();
+        }
+        public void Hide(Type type, Action onComplete = null)
+        {
+            HideInternal(type, onComplete).Forget();
         }
         public void Hide(UIBase ui)
         {
             HideUI(ui).Forget();
         }
-        private async UniTaskVoid HideInternal<T>(Action onComplete = null) where T : UIBase
+        private async UniTaskVoid HideInternal(Type requestedType, Action onComplete = null)
         {
-            if (!_spawned.TryGetValue(typeof(T), out UIBase ui))
+            if (!TryGetSpawned(requestedType, out UIBase ui))
                 return;
 
             try
@@ -224,8 +247,52 @@ namespace GameTemplate.Runtime.WGUI
             }
             catch (OperationCanceledException)
             {
-                Debug.LogWarning($"[UIManager] Hide {typeof(T).Name} was canceled.");
+                Debug.LogWarning($"[UIManager] Hide {requestedType.Name} was canceled.");
             }
+        }
+
+        /// <summary>Hides every open popup except the given types (and their registered subclasses).</summary>
+        public UniTask HideAllPopupsAsync(ICollection<Type> keep = null)
+        {
+            List<UniTask> tasks = new();
+            foreach (UIBase popup in new List<UIBase>(_popupStack))
+            {
+                if (popup == null || (keep != null && keep.Contains(popup.GetType())))
+                    continue;
+
+                tasks.Add(HideUI(popup));
+            }
+
+            return UniTask.WhenAll(tasks);
+        }
+
+        /// <summary>True while the screen (or the registered subclass of a base type) is active.</summary>
+        public bool IsVisible<T>() where T : UIBase
+        {
+            return IsVisible(typeof(T));
+        }
+
+        public bool IsVisible(Type type)
+        {
+            return TryGetSpawned(type, out UIBase ui) && ui.gameObject.activeSelf;
+        }
+
+        /// <summary>The spawned instance, without showing it.</summary>
+        public bool TryGet<T>(out T ui) where T : UIBase
+        {
+            bool found = TryGetSpawned(typeof(T), out UIBase spawned);
+            ui = spawned as T;
+            return found && ui != null;
+        }
+
+        private bool TryGetSpawned(Type requestedType, out UIBase ui)
+        {
+            ui = null;
+            if (requestedType == null)
+                return false;
+
+            Type type = uiConfig.ResolveType(requestedType) ?? requestedType;
+            return _spawned.TryGetValue(type, out ui) && ui != null;
         }
 
         public void HideAll(Action onComplete = null)

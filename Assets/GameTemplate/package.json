@@ -1,6 +1,6 @@
 {
   "name": "com.tito.unity-template",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "displayName": "Tito Template",
   "description": "A comprehensive game development template with core systems and event management",
   "unity": "2022.3",
