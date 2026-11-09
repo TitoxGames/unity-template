@@ -71,11 +71,11 @@ Install Unity Template
 or install manually via Git URL:
 
 ```
-https://github.com/TitoniumGames/unity-template.git?path=/Assets/GameTemplate
+https://github.com/TitoniumGames/unity-template.git?path=/Assets/TitoX
 ```
 
 ```
-git@github.com:TitoniumGames/unity-template.git?path=/Assets/GameTemplate
+git@github.com:TitoniumGames/unity-template.git?path=/Assets/TitoX
 ```
 
 ---

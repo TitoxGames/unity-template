@@ -5,7 +5,7 @@ namespace Tito.Services.IAP
 {
     [CreateAssetMenu(
         fileName = "IAPCatalog",
-        menuName = "GameTemplate/IAP/IAP Catalog")]
+        menuName = "TitoX/IAP/IAP Catalog")]
     public class IAPCatalog : ScriptableObject
     {
         [SerializeField]

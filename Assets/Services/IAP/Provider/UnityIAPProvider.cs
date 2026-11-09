@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using GameTemplate.Runtime.Core.WCore.EventBus;
+using TitoX.Core.EventBus;
 using Tito.Services.IAP.Events;
 using UnityEngine;
 using UnityEngine.Purchasing;
 
 namespace Tito.Services.IAP.Provider
 {
-    [CreateAssetMenu(fileName = "UnityIAPProvider", menuName = "GameTemplate/IAP/UnityIAPProvider")]
+    [CreateAssetMenu(fileName = "UnityIAPProvider", menuName = "TitoX/IAP/UnityIAPProvider")]
     public class UnityIAPProvider : IAPProvider
     {
         public override Action Initialized { get; set; }

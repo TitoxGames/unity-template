@@ -478,7 +478,7 @@ namespace Installer.Editor.Validator
             {
                 if (GUILayout.Button("Install Unity Template", GUILayout.Height(34)))
                 {
-                    UnityEditor.PackageManager.Client.Add("https://github.com/TitoniumGames/unity-template.git?path=/Assets/GameTemplate");
+                    UnityEditor.PackageManager.Client.Add("https://github.com/TitoniumGames/unity-template.git?path=/Assets/TitoX");
                 }
             }
             else if(_selectedTab == 1)

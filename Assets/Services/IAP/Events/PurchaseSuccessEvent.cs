@@ -1,4 +1,4 @@
-﻿using GameTemplate.Runtime.Core.WCore.EventBus;
+﻿using TitoX.Core.EventBus;
 
 namespace Tito.Services.IAP.Events
 {

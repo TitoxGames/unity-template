@@ -1,7 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using WCore;
+using TitoX.Core;
 
 namespace Tito.Services.IAP
 {

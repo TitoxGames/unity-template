@@ -10,7 +10,7 @@ namespace Installer.Editor.Validator
     [InitializeOnLoad]
     public static class FrameworkValidator
     {
-        private const string SessionKey = "GameTemplate.Framework.Validator";
+        private const string SessionKey = "TitoX.Framework.Validator";
 
         public class Item
         {

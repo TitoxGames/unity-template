@@ -1,0 +1,23 @@
+{
+    "name": "TitoX.Runtime",
+    "rootNamespace": "TitoX",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.Addressables",
+        "UniTask",
+        "Unity.ResourceManager",
+        "UniTask.DOTween",
+        "DOTween.Modules",
+        "Unity.Purchasing",
+        "ParticleImage"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

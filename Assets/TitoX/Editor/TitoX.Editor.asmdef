@@ -1,0 +1,16 @@
+{
+    "name": "TitoX.Editor",
+    "rootNamespace": "TitoX.Editor",
+    "references": ["GUID:5c31a32efcbc7384fb7f07d81a49c90d"],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
