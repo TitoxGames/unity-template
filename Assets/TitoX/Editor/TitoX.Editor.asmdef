@@ -1,7 +1,13 @@
 {
     "name": "TitoX.Editor",
     "rootNamespace": "TitoX.Editor",
-    "references": ["GUID:5c31a32efcbc7384fb7f07d81a49c90d"],
+    "references": [
+        "GUID:5c31a32efcbc7384fb7f07d81a49c90d",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
+    ],
     "includePlatforms": [
         "Editor"
     ],

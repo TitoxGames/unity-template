@@ -33,7 +33,8 @@ Chỉ một request chạy tại một thời điểm (`UIFlow.IsBusy`).
 | | `IUIFeedback` → `UIFeedback.Current` | Âm click và haptic. |
 | | `IAdsGate` → `UIAds.Current` | Rewarded / interstitial. |
 | Màn hình gốc | `LoadingScreenBase`, `IrisTransitionScreen`, `HomeScreenBase`, `WinScreenBase`, `LoseScreenBase`, `SettingScreenBase` | Dùng thẳng hoặc kế thừa. |
-| Component | `../Components` | `SettingToggle`, `ButtonContentTint`, `PanelAnimation`, `StaggeredReveal`, `IrisHole`, `MultiplierSlider`, `ScaleToCoverParent`, `ExtendToScreenBottom`, `BackgroundFullScreen`, `RewardIconRiseEffect`. |
+| Home tabs | `HomeBottomBarScreenBase`, `ShopScreenBase`, `CollectionsScreenBase`, `HomeTab`, `HomeTabShownEvent` | Bottom bar chuyển giữa Shop / Home / Collections (xem bên dưới). |
+| Component | `../Components` | `SettingToggle`, `ButtonContentTint`, `PanelAnimation`, `StaggeredReveal`, `IrisHole`, `MultiplierSlider`, `ScaleToCoverParent`, `ExtendToScreenBottom`, `BackgroundFullScreen`, `RewardIconRiseEffect`, `HomeTabButton`. |
 
 ## Tích hợp vào game mới
 
@@ -76,6 +77,25 @@ Chỉ một request chạy tại một thời điểm (`UIFlow.IsBusy`).
    UIAds.Current = new MyAdsGate();           // bọc AdsService của game
    ```
 6. **Gameplay báo kết quả**: lưu phần thưởng xong thì gọi `UIFlow.Win()`; thua thì `UIFlow.Lose()`.
+
+## Home tabs (Shop / Home / Collections)
+
+Bottom bar 3 tab trong state Home. Shop và Collections là màn hình **FullScreen** riêng: mở Shop thì `UIManager`
+tự ẩn Home (và ngược lại), state của flow vẫn là Home nên `Play()` chỉ bấm được từ Home.
+
+| Màn hình | Canvas Type | Sorting Order | Ghi chú |
+|---|---|---|---|
+| `ShopScreenBase` / `CollectionsScreenBase` | FullScreen | -1 (mặc định) | Mở bằng tab, hoặc `UIManager.Show<ShopScreenBase>()` từ bất kỳ đâu. |
+| `HomeBottomBarScreenBase` | Popup | 100 | Trên các FullScreen (0), dưới popup (200+) nên Settings vẫn đè lên bar. Thêm vào state **Home** của `UIFlowConfig` cùng Home screen. |
+
+- Mỗi màn hình tab (kể cả `HomeScreenBase`) post `HomeTabShownEvent` khi hiện, bar nghe event đó để chọn đúng tab
+  dù màn hình được mở từ đâu.
+- `HomeTabButton`: nền `Selected` + `Label` chỉ hiện khi được chọn, icon to lên và nhô lên (DOTween).
+- Đổi màn hình cho một tab: override `HomeBottomBarScreenBase.GetScreenType(HomeTab)`.
+- Dựng nhanh: **Tools > Game Template > UI > Build Home Tab Screens** tạo 3 prefab cạnh Home screen (dùng subclass
+  duy nhất của game nếu có, vd. `ShopScreen : ShopScreenBase`), đánh dấu Addressable, thêm vào `UIConfigSO` và đưa
+  bar vào state Home. Màn hình đã đăng ký thì bỏ qua. Sau đó gán sprite cho icon / nền của bar.
+- Nội dung Shop / Collections nên chừa ~220px phía dưới cho bar.
 
 ## Mở rộng màn hình
 

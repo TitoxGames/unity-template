@@ -1,3 +1,4 @@
+using TitoX.Core.EventBus;
 using TitoX.UI.Components;
 using TMPro;
 using UnityEngine;
@@ -30,6 +31,7 @@ namespace TitoX.UI.Flow
         {
             playButton.interactable = true;
             RefreshLevel(UIFlow.CurrentLevel);
+            EventBus<HomeTabShownEvent>.Post(new HomeTabShownEvent(HomeTab.Home));
         }
 
         protected virtual void RefreshLevel(int level)

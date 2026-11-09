@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-09
+
+### Added
+- `UI/Flow`: Home tabs — `HomeBottomBarScreenBase` (bottom bar shown as a Popup in the Home state), `ShopScreenBase` and
+  `CollectionsScreenBase` (full screens), `HomeTab`, `HomeTabShownEvent`. See "Home tabs" in `Runtime/UI/Flow/README.md`.
+- `UI/Components`: `HomeTabButton` (script GUID kept from Food Frenzy).
+- Editor: `Tools > Game Template > UI > Build Home Tab Screens` creates and registers the three screens.
+
+### Changed
+- `HomeScreenBase` posts `HomeTabShownEvent(HomeTab.Home)` when shown.
+- `TitoX.Editor` references TextMeshPro, UGUI and Addressables (Editor).
+
 ## [1.1.0] - 2026-10-31
 
 ### Added
